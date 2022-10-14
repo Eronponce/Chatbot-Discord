@@ -2,11 +2,15 @@ import json
 import os
 import pickle
 import random
+import time
+
+
+import nltk
+import numpy as np
 import tensorflow as tf
 import tflearn
-import numpy as np
-import nltk
 from nltk.stem.lancaster import LancasterStemmer
+
 stemmer = LancasterStemmer()
 
 with open("intents.json") as file:
@@ -16,6 +20,12 @@ try:
     with open("data.pickle", "rb") as f:
         words, labels, training, output = pickle.load(f)
 except:
+    os.remove("checkpoint")
+    os.remove("data.pickle")
+    os.remove("model.tflearn.index")
+    os.remove("model.tflearn.meta")
+    os.remove("model.tflearn.data-00000-of-00001")
+
     words = []
     labels = []
     docs_x = []
@@ -112,17 +122,43 @@ def chat():
         results = model.predict([bag_of_words(inp, words)])
         results_index = np.argmax(results)
         tag = labels[results_index]
-
+        time.sleep(3)
         print(results[0][results_index])
 
-        if results[0][results_index] > 0.95:
+        if results[0][results_index] > 0.75:
             for tg in data["intents"]:
                 if tg["tag"] == tag:
                     responses = tg["responses"]
 
             print(random.choice(responses))
         else:
-            print("Não entendi")
+            print("================")
+            print("Não entendi, ensine-me")
+            print("================")
+            print("Qual tema foi direcionado?")
+            print("================")
+            for tags in data['intents']:
+                print(tags['tag'])
+
+            response = input("Qual tema?: ")
+
+            for tags in data['intents']:
+                i = 0
+                if response == tags['tag']:
+                    print("================")
+                    print(tags['tag']," Será escrito: ",inp, " : Qual seria a resposta correta?" )
+                    print("================")
+                    respostaCorreta = input("Resposta: ")
+                    with open("intents.json", "r") as jsonFile:
+                        Novodata = json.load(jsonFile)
 
 
+                    Novodata['intents'][i]['responses'].append(respostaCorreta)
+                    Novodata['intents'][i]['patterns'].append(inp)
+
+                    with open("intents.json", "w") as jsonFile:
+                        json.dump(Novodata, jsonFile)
+                        
+                i = i + 1
+                                    
 chat()
