@@ -160,5 +160,5 @@ def chat():
                         json.dump(Novodata, jsonFile)
                         
                 i = i + 1
-                                    
+
 chat()
