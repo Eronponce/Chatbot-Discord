@@ -152,15 +152,16 @@ def chat():
                 
                 if response == tags['tag']:
                     print("================")
-                    print(tags['tag']," Será escrito: ",inp, " : Qual seria a resposta correta?" )
+                    print(tags['tag']," Será escrito: ",inp, " : Qual seria a resposta correta? : 2 : para cancelar" )
                     print("================")
                     respostaCorreta = input("Resposta: ")
-                    with open("intents.json", "r") as jsonFile:
-                        Novodata = json.load(jsonFile)
+                    if respostaCorreta != "2":
+                        with open("intents.json", "r") as jsonFile:
+                            Novodata = json.load(jsonFile)
 
 
-                    Novodata['intents'][i]['responses'].append(respostaCorreta)
-                    Novodata['intents'][i]['patterns'].append(inp)
+                        Novodata['intents'][i]['responses'].append(respostaCorreta)
+                        Novodata['intents'][i]['patterns'].append(inp)
 
                     with open("intents.json", "w") as jsonFile:
                         json.dump(Novodata, jsonFile)
