@@ -16,7 +16,8 @@ stemmer = LancasterStemmer()
 with open("intents.json") as file:
     data = json.load(file)
 
-try:
+try:  
+    sfb
     with open("data.pickle", "rb") as f:
         words, labels, training, output = pickle.load(f)
 except:
@@ -114,15 +115,20 @@ def bag_of_words(s, words):
 
 def chat():
     print("Comece a falar com o bot")
+    inp = ""
     while True:
+        tempinp = inp 
+        
         inp = input("You: ")
+        if inp == tempinp:
+            print("Ja me perguntou isto")
+            continue
         if inp.lower() == "quit":
             break
 
         results = model.predict([bag_of_words(inp, words)])
         results_index = np.argmax(results)
         tag = labels[results_index]
-        time.sleep(3)
         print(results[0][results_index])
 
         if results[0][results_index] > 0.75:
@@ -141,9 +147,9 @@ def chat():
                 print(tags['tag'])
 
             response = input("Qual tema?: ")
-
+            i = 0
             for tags in data['intents']:
-                i = 0
+                
                 if response == tags['tag']:
                     print("================")
                     print(tags['tag']," Será escrito: ",inp, " : Qual seria a resposta correta?" )
