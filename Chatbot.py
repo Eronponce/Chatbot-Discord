@@ -3,7 +3,7 @@ import os
 import pickle
 import random
 import time
-
+import discord
 
 import nltk
 import numpy as np
@@ -199,4 +199,19 @@ def chat():
                         
                 i = i + 1
 
-chat()
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
+
+
+@client.event
+async def on_message(message):
+    channel = client.get_channel(821504758078373961)
+    print(message.content)
+
+    
+
+client.run('MTAyOTU0Mjg2NzUzNTkyNTQxOA.GuRv7O.K_xfnaQwxtlEwrS3-DNpnBvFUd9Tt7WdJJRl7U')
