@@ -1,3 +1,4 @@
+from asyncio.base_subprocess import ReadSubprocessPipeProto
 import json
 import os
 import pickle
@@ -111,95 +112,6 @@ def bag_of_words(s, words):
 
     return np.array(bag)
 
-
-def chat():
-    print("Comece a falar com o bot")
-    inp = ""
-    while True:
-        tempinp = inp 
-        
-        inp = input("You: ")
-        if inp == tempinp:
-            print("Ja me perguntou isto")
-            continue
-        if inp.lower() == "quit":
-            break
-
-        results = model.predict([bag_of_words(inp, words)])
-        results_index = np.argmax(results)
-        tag = labels[results_index]
-        print(results[0][results_index])
-
-        if results[0][results_index] > 0.9:
-            for tg in data["intents"]:
-                if tg["tag"] == tag:
-                    responses = tg["responses"]
-
-            print(random.choice(responses))
-        else:
-            print("================")
-            print("Não entendi, ensine-me")
-            print("================")
-            print("Qual tema foi direcionado? digite : 2 : Para escrever o tema personalizado")
-            print("================")
-            for tags in data['intents']:
-                print(tags['tag'])
-
-            response = input("Qual tema?: ")
-
-            if response == "2":
-                with open("intents.json", "r") as jsonFile:
-                            Novodata = json.load(jsonFile)
-                tema = input("Escreva o tema: ")
-                
-
-                print("================")
-                print(tema," Será escrito: ",inp, " : Qual seria a resposta correta? : 2 : para cancelar" )
-                print("Escreva 3 se nao contém resposta" )
-                print("================")
-                respostaCorreta = input("Resposta: ")
-
-                if respostaCorreta == 3:
-                   
-                    novoTema = {"tag": tema,"patterns": [inp],"responses": [],"context_set": []}
-
-                    Novodata['intents'].append(novoTema)
-
-                    with open("intents.json", "w") as jsonFile:
-                        json.dump(Novodata, jsonFile)
-
-                elif respostaCorreta != "2":
-                   
-
-                    novoTema = {"tag": tema,"patterns": [inp],"responses": [respostaCorreta],"context_set": []}
-
-                    Novodata['intents'].append(novoTema)
-
-                    with open("intents.json", "w") as jsonFile:
-                        json.dump(Novodata, jsonFile)
-                        print("Aprendido, continue a conversar")
-                        continue
-
-            i = 0
-            for tags in data['intents']:
-                if response == tags['tag']:
-                    print("================")
-                    print(tags['tag']," Será escrito: ",inp, " : Qual seria a resposta correta? : 2 : para cancelar" )
-                    print("================")
-                    respostaCorreta = input("Resposta: ")
-                    if respostaCorreta != "2":
-                        with open("intents.json", "r") as jsonFile:
-                            Novodata = json.load(jsonFile)
-
-                        Novodata['intents'][i]['responses'].append(respostaCorreta)
-                        Novodata['intents'][i]['patterns'].append(inp)
-
-                    with open("intents.json", "w") as jsonFile:
-                        json.dump(Novodata, jsonFile)
-                        
-                i = i + 1
-
-
 client = discord.Client()
 
 @client.event
@@ -207,11 +119,31 @@ async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 
+
 @client.event
 async def on_message(message):
+    if message.author == client.user:
+        return
+        
     channel = client.get_channel(821504758078373961)
-    print(message.content)
-
+        
+    inp = message.content
     
+    results = model.predict([bag_of_words(inp, words)])
+    results_index = np.argmax(results)
+    tag = labels[results_index]
+
+    await message.channel.send(results[0][results_index])
+
+    if results[0][results_index] > 0.9:
+        for tg in data["intents"]:
+            if tg["tag"] == tag:
+                responses = tg["responses"]
+
+        await message.channel.send(random.choice(responses))
+    else:
+        respostasEnigmaticas = ["Bacana","legal","Bem complexo","não sei nao"]
+        await message.channel.send(random.choice(respostasEnigmaticas))
+
 
 client.run('MTAyOTU0Mjg2NzUzNTkyNTQxOA.GuRv7O.K_xfnaQwxtlEwrS3-DNpnBvFUd9Tt7WdJJRl7U')
